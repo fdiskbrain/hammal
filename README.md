@@ -27,8 +27,7 @@ type = "webpack"
 account_id = "your account_id"
 workers_dev = true
 route = ""
-zone_id = ""
-webpack_config = "webpack.config.js"
+main = "src/index.ts"
 kv_namespaces = [
 	 { binding = "HAMMAL_CACHE", id = "you kv id" }
 ]
@@ -54,7 +53,7 @@ EOF
 
 ### 获取其他镜像源镜像
 
-目前 hammal 支持获取 `k8s.gcr.io`, `gcr.io`, `quay.io` 的镜像，可以通过修改 handler.ts 中的 `ORG_NAME_BACKEND` 添加
+目前 hammal 支持获取 `k8s.gcr.io`, `gcr.io`, `quay.io` `registry.k8s.io` 的镜像，可以通过修改 handler.ts 中的 `ORG_NAME_BACKEND` 添加
 
 ```bash
 # 拉取 k8s.gcr.io 镜像
@@ -65,6 +64,10 @@ docker pull hammal.{your_name}.workers.dev/gcr/youlib/image:tags
 
 # 拉取 quay.io 镜像
 docker pull hammal.{your_name}.workers.dev/quay/coreos/flannel:v0.13.1-rc2
+
+# 拉取 registry.k8s.io 镜像
+docker pull hammal.{your_name}.workers.dev/k8s/youlib/image:tags
+
 ```
 
 ### TODO
