@@ -23,7 +23,6 @@ wrangler kv:namespace create hammal_cache
 
 ```toml
 name = "hammal"
-type = "webpack"
 account_id = "your account_id"
 workers_dev = true
 route = ""
