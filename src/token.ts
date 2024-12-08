@@ -15,8 +15,8 @@ function parseAuthenticateStr(authenticateStr: string): WwwAuthenticate {
     throw new Error(`Invalid Www-Authenticate ${authenticateStr}`)
   }
   const params = bearer[1].split(",")
-  let get_param = function(name: string): string {
-    for(const param of params) {
+  let get_param = function (name: string): string {
+    for (const param of params) {
       const kvPair = param.split("=", 2)
       if (kvPair.length !== 2 || kvPair[0] !== name) {
         continue
@@ -33,8 +33,8 @@ function parseAuthenticateStr(authenticateStr: string): WwwAuthenticate {
 }
 
 class TokenProvider {
-  private username: string|undefined;
-  private password: string|undefined;
+  private username: string | undefined;
+  private password: string | undefined;
 
   constructor(username?: string, password?: string) {
     this.username = username;
@@ -44,17 +44,17 @@ class TokenProvider {
   private async authenticateCacheKey(wwwAuthenticate: WwwAuthenticate): Promise<string> {
     const keyStr = `${this.username}:${this.password}/${wwwAuthenticate.realm}/${wwwAuthenticate.service}/${wwwAuthenticate.scope}`
     const keyStrText = new TextEncoder().encode(keyStr)
-    const digestArray = await crypto.subtle.digest({name: "SHA-256"}, keyStrText)
+    const digestArray = await crypto.subtle.digest({ name: "SHA-256" }, keyStrText)
     const digestUint8Array = new Uint8Array(digestArray);
     let hexArray = []
-    for(const num of digestUint8Array) {
+    for (const num of digestUint8Array) {
       hexArray.push(num.toString(16))
     }
     const digestHex = hexArray.join('')
     return `token/${digestHex}`
   }
 
-  private async tokenFromCache(cacheKey: string): Promise<Token|null> {
+  private async tokenFromCache(cacheKey: string): Promise<Token | null> {
     const value = await HAMMAL_CACHE.get(cacheKey)
     if (value === null) {
       return null
@@ -63,7 +63,7 @@ class TokenProvider {
   }
 
   private async tokenToCache(cacheKey: string, token: Token) {
-    await HAMMAL_CACHE.put(cacheKey, JSON.stringify(token), {expirationTtl: token.expires_in})
+    await HAMMAL_CACHE.put(cacheKey, JSON.stringify(token), { expirationTtl: token.expires_in })
   }
 
   private async fetchToken(wwwAuthenticate: WwwAuthenticate): Promise<Token> {
@@ -75,18 +75,18 @@ class TokenProvider {
       url.searchParams.set("scope", wwwAuthenticate.scope)
     }
     // TODO: support basic auth
-    const response = await fetch(url.toString(), {method: "GET", headers: {}})
+    const response = await fetch(url.toString(), { method: "GET", headers: {} })
     if (response.status !== 200) {
       throw new Error(`Unable to fetch token from ${url.toString()} status code ${response.status}`)
     }
-    const body = await response.json()
-    return {token: body.token, expires_in: body.expires_in}
+    const body = await response.json<any>()
+    return { token: body.token, expires_in: body.expires_in }
   }
 
   async token(authenticateStr: string): Promise<Token> {
     const wwwAuthenticate: WwwAuthenticate = parseAuthenticateStr(authenticateStr)
     const cacheKey = await this.authenticateCacheKey(wwwAuthenticate)
-    const cachedToken: Token|null = await this.tokenFromCache(cacheKey)
+    const cachedToken: Token | null = await this.tokenFromCache(cacheKey)
     if (cachedToken !== null) {
       return cachedToken
     }

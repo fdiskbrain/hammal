@@ -6,7 +6,7 @@ interface ProxyArgs {
 
 class Backend {
   private host: string;
-  private tokenProvider: TokenProvider|undefined;
+  private tokenProvider: TokenProvider | undefined;
 
   constructor(host: string, tokenProvider?: TokenProvider) {
     this.host = host;
@@ -16,7 +16,7 @@ class Backend {
   async proxy(pathname: string, args: ProxyArgs): Promise<Response> {
     const url = new URL(this.host)
     url.pathname = pathname
-    const response = await fetch(url.toString(), {method: "GET", headers:args.headers, redirect: "follow"})
+    const response = await fetch(url.toString(), { method: "GET", headers: args.headers, redirect: "follow" })
     if (this.tokenProvider === undefined) {
       return response
     }
@@ -31,8 +31,9 @@ class Backend {
     const token: Token = await this.tokenProvider.token(authenticateStr)
     const authenticatedHeaders = new Headers(args.headers)
     authenticatedHeaders.append("Authorization", `Bearer ${token.token}`)
-    return await fetch(url.toString(), {method: "GET", headers:authenticatedHeaders, redirect: "follow"})
+    // console.log(url.toString)
+    return await fetch(url.toString(), { method: "GET", headers: authenticatedHeaders, redirect: "follow" })
   }
 }
 
-export {Backend}
+export { Backend }
