@@ -44,7 +44,7 @@ function orgNameFromPath(pathname: string): string | null {
 }
 
 function orgNameByHeader(headers: Headers): string {
-  return headers.get("x-org") || DEFAULT_BACKEND_HOST
+  return headers.get("x-org") ?? DEFAULT_BACKEND_HOST
 }
 
 function hostByOrgName(orgName: string | null): string {
@@ -67,7 +67,7 @@ function rewritePathByOrg(orgName: string | null, pathname: string): string {
 
 async function handleRegistryRequest(request: Request): Promise<Response> {
   const reqURL = new URL(request.url)
-  const orgName = orgNameFromPath(reqURL.pathname) ?? orgNameByHeader(request.headers)
+  const orgName =  orgNameByHeader(request.headers) ?? orgNameFromPath(reqURL.pathname) 
   const pathname = rewritePathByOrg(orgName, reqURL.pathname)
   const host = hostByOrgName(orgName)
   const tokenProvider = new TokenProvider()
