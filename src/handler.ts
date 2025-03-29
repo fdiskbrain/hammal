@@ -8,6 +8,8 @@ const ORG_NAME_BACKEND: { [key: string]: string; } = {
   "k8sgcr": "https://k8s.gcr.io",
   "quay": "https://quay.io",
   "k8s": "https://registry.k8s.io",
+  "aws":"https://public.ecr.aws",
+
 }
 
 const DEFAULT_BACKEND_HOST: string = "https://registry-1.docker.io"
@@ -27,6 +29,13 @@ function copyProxyHeaders(inputHeaders: Headers): Headers {
 }
 
 function orgNameFromPath(pathname: string): string | null {
+  /* 
+    path: /v2/orgName/repo/xxx
+          /v2/repo/xxxx
+          /v2/library/repo/xxxx
+          public.ecr.aws/docker/library/alpine
+          
+  */
   const splitedPath: string[] = pathname.split("/", 3)
   if (splitedPath.length === 3 && splitedPath[0] === "" && splitedPath[1] === "v2") {
     return splitedPath[2].toLowerCase()
@@ -58,7 +67,7 @@ function rewritePathByOrg(orgName: string | null, pathname: string): string {
 
 async function handleRegistryRequest(request: Request): Promise<Response> {
   const reqURL = new URL(request.url)
-  const orgName = orgNameFromPath(reqURL.pathname) || orgNameByHeader(request.headers)
+  const orgName = orgNameFromPath(reqURL.pathname) ?? orgNameByHeader(request.headers)
   const pathname = rewritePathByOrg(orgName, reqURL.pathname)
   const host = hostByOrgName(orgName)
   const tokenProvider = new TokenProvider()
