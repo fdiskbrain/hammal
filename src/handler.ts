@@ -43,8 +43,8 @@ function orgNameFromPath(pathname: string): string | null {
   return null
 }
 
-function orgNameByHeader(headers: Headers): string {
-  return headers.get("x-org") ?? DEFAULT_BACKEND_HOST
+function orgNameByHeader(headers: Headers): string | null {
+  return headers.get("x-org") 
 }
 
 function hostByOrgName(orgName: string | null): string {
