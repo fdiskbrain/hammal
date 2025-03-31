@@ -65,12 +65,13 @@ function rewritePathByOrg(orgName: string | null, pathname: string): string {
   return cleanSplitedPath.join("/")
 }
 
-function hostByNS(url: URL): string | null {
-  if (url.searchParams.get('ns') !== null) {
-    url.protocol = "https"
-    return url.host
+function hostByNamespace(url: URL): string | null {
+  var ns: string | null
+  ns = url.searchParams.get('ns')
+  if (ns !== null) {
+    return "https://" + ns
   }
-  return null
+  return ns
 }
 
 async function handleRegistryRequest(request: Request): Promise<Response> {
@@ -79,7 +80,7 @@ async function handleRegistryRequest(request: Request): Promise<Response> {
   const ns = reqURL.searchParams.get('ns')
   const orgName = orgNameByHeader(request.headers) ?? orgNameFromPath(reqURL.pathname)
   const pathname = rewritePathByOrg(orgName, reqURL.pathname)
-  const host = hostByNS(reqURL) ?? hostByOrgName(orgName)
+  const host = hostByNamespace(reqURL) ?? hostByOrgName(orgName)
   const tokenProvider = new TokenProvider()
   const backend = new Backend(host, tokenProvider)
   const headers = copyProxyHeaders(request.headers)
