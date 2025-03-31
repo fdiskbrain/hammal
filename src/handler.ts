@@ -8,7 +8,7 @@ const ORG_NAME_BACKEND: { [key: string]: string; } = {
   "k8sgcr": "https://k8s.gcr.io",
   "quay": "https://quay.io",
   "k8s": "https://registry.k8s.io",
-  "aws":"https://public.ecr.aws",
+  "aws": "https://public.ecr.aws",
 
 }
 
@@ -44,7 +44,7 @@ function orgNameFromPath(pathname: string): string | null {
 }
 
 function orgNameByHeader(headers: Headers): string | null {
-  return headers.get("x-org") 
+  return headers.get("x-org")
 }
 
 function hostByOrgName(orgName: string | null): string {
@@ -65,14 +65,24 @@ function rewritePathByOrg(orgName: string | null, pathname: string): string {
   return cleanSplitedPath.join("/")
 }
 
+function hostByNS(url: URL): string | null {
+  if (url.searchParams.get('ns') !== null) {
+    url.protocol = "https"
+    return url.host
+  }
+  return null
+}
+
 async function handleRegistryRequest(request: Request): Promise<Response> {
+
   const reqURL = new URL(request.url)
-  const orgName =  orgNameByHeader(request.headers) ?? orgNameFromPath(reqURL.pathname) 
+  const ns = reqURL.searchParams.get('ns')
+  const orgName = orgNameByHeader(request.headers) ?? orgNameFromPath(reqURL.pathname)
   const pathname = rewritePathByOrg(orgName, reqURL.pathname)
-  const host = hostByOrgName(orgName)
+  const host = hostByNS(reqURL) ?? hostByOrgName(orgName)
   const tokenProvider = new TokenProvider()
   const backend = new Backend(host, tokenProvider)
   const headers = copyProxyHeaders(request.headers)
-  console.log(orgName, pathname, host)
+  console.log(ns, orgName, pathname, host)
   return backend.proxy(pathname, { headers: request.headers })
 }
